@@ -378,6 +378,22 @@ defmodule Ecto.Adapters.PostgresTest do
 
     query = Schema |> select([], type(^["601d74e4-a8d3-4b6e-8365-eddb4c893327"], {:array, Ecto.UUID})) |> plan()
     assert all(query) == ~s{SELECT $1::uuid[] FROM "schema" AS s0}
+
+    assert all(query) == ~s{SELECT $1::uuid[] FROM "schema" AS s0}
+
+    query = Schema |> select([s], type(s.x, Ecto.UUID)) |> plan()
+    assert all(query) == ~s{SELECT s0.\"x\"::uuid FROM "schema" AS s0}
+
+    # Below won't compile
+    # query = Schema |> select([s], type(field(s, :x), Ecto.UUID)) |> plan()
+    # assert all(query) == ~s{SELECT s0.\"x\"::uuid FROM "schema" AS s0}
+
+    # field = :x
+    # query = Schema |> select([s], type(field(s, ^field), Ecto.UUID)) |> plan()
+    # assert all(query) == ~s{SELECT s0.\"x\"::uuid FROM "schema" AS s0}
+
+    # query = Schema |> group_by([s], s.id) |> select([s], type(avg(field(s, :x)), Ecto.UUID)) |> plan()
+    # assert all(query) == ~s{SELECT avg(s0.\"x\")::uuid FROM "schema" AS s0 GROUP BY s0.\"id\"}
   end
 
   test "nested expressions" do
